@@ -139,7 +139,7 @@ CPP_FILES += loudness_dialog.cc
 CPP_FILES += loudness_settings.cc
 CPP_FILES += lua_script_manager.cc
 CPP_FILES += luadialog.cc
-CPP_FILES += luadoc.cc
+#CPP_FILES += luadoc.cc # This causes multiple main
 CPP_FILES += luainstance.cc
 CPP_FILES += luawindow.cc
 #CPP_FILES += lv2_plugin_ui.cc  # Only if HAVE_SUIL (which we don't)
@@ -283,12 +283,12 @@ CPP_FILES += streamview.cc
 CPP_FILES += strip_silence_dialog.cc
 CPP_FILES += stripable_colorpicker.cc
 CPP_FILES += stripable_time_axis.cc
-CPP_FILES += stripable_treemodel.cc
+#CPP_FILES += stripable_treemodel.cc
 CPP_FILES += sys_ex.cc
 CPP_FILES += template_dialog.cc
 CPP_FILES += tempo_curve.cc
 CPP_FILES += tempo_dialog.cc
-CPP_FILES += tempo_lines.cc
+#CPP_FILES += tempo_lines.cc
 CPP_FILES += tempo_map_change.cc
 CPP_FILES += time_axis_view.cc
 CPP_FILES += time_axis_view_item.cc
@@ -309,14 +309,14 @@ CPP_FILES += transport_masters_dialog.cc
 CPP_FILES += transpose_dialog.cc
 CPP_FILES += trigger_clip_picker.cc
 CPP_FILES += trigger_jump_dialog.cc
-CPP_FILES += trigger_master.cc
+# CPP_FILES += trigger_master.cc # name was not declared in this scope
 CPP_FILES += trigger_page.cc
 CPP_FILES += trigger_region_list.cc
 CPP_FILES += trigger_route_list.cc
 CPP_FILES += trigger_source_list.cc
 CPP_FILES += trigger_strip.cc
 CPP_FILES += trigger_ui.cc
-CPP_FILES += triggerbox_ui.cc
+#CPP_FILES += triggerbox_ui.cc # Name was not declared in this scope
 CPP_FILES += ui_config.cc
 CPP_FILES += utils.cc
 CPP_FILES += utils_videotl.cc
@@ -333,19 +333,24 @@ CPP_FILES += virtual_keyboard_window.cc
 CPP_FILES += visibility_group.cc
 CPP_FILES += vst_plugin_ui.cc
 CPP_FILES += window_manager.cc
-CPP_FILES += windows_vst_plugin_ui.cc
+
+# VST - WINDOWS
+#CPP_FILES += windows_vst_plugin_ui.cc # For windows
 
 # VST3 Support
 #CPP_FILES += vst3_hwnd_plugin_ui.cc (darwin)
 #CPP_FILES += vst3_plugin_ui.cc (windows)
-CPP_FILES += vst3_x11_plugin_ui.cc
+#CPP_FILES += vst3_x11_plugin_ui.cc # VST3X11PluginUI does not name a type
 
 # If you can't find it: use pkg-config --list-all | grep
-COMMON_FLAGS += $(shell pkg-config --cflags glibmm-2.4 gtkmm-2.4 libxml-2.0 lilv-0)
+COMMON_LIBS += -lpthread
+COMMON_FLAGS += $(shell pkg-config --cflags glibmm-2.4 gtkmm-2.4 libxml-2.0 lilv-0 x11)
+COMMON_LIBS += $(shell pkg-config --libs glibmm-2.4 gtkmm-2.4 libxml-2.0 lilv-0 x11)
 
 BUILD_C_FLAGS += $(COMMON_FLAGS)
 
 # WTF: signals.py has a lot of RAW stuff in there to generate a header file, why not just have a header file??
+BUILD_C_FLAGS += -I../libs
 BUILD_C_FLAGS += -I../libs/pbd
 BUILD_C_FLAGS += -I../libs/ardour
 BUILD_C_FLAGS += -I../libs/gtkmm2ext
@@ -361,6 +366,7 @@ BUILD_C_FLAGS += -I../libs/zita-resampler
 BUILD_C_FLAGS += -I../libs/ctrl-interface/control_protocol
 BUILD_C_FLAGS += -I../libs/ptformat
 BUILD_C_FLAGS += -I../libs/audiographer
+BUILD_C_FLAGS += -I../libs/vst3
 
 # FLAGS (Mostly defined in /wscript)
 BUILD_C_FLAGS += -DVERSIONSTRING=\"7.5\"
@@ -393,7 +399,7 @@ CC=g++ $(WARN_FLAGS)
 BUILD_DIR = ../build_test
 GUI_OBJS = $(CPP_FILES:%=$(BUILD_DIR)/%.o)
 
-TARGETS = ardev.a
+TARGETS = ardour7
 
 all: $(TARGETS)
 
@@ -401,6 +407,10 @@ $(BUILD_DIR)/%.cc.o: %.cc
 	-@mkdir -p "$(shell dirname $(BUILD_DIR)/$<)"
 	@echo "\nCompiling $<"
 	$(CC) $< $(BUILD_C_FLAGS) -c -o $@
+
+ardour7: $(GUI_OBJS)
+	@echo "Creating $@"
+	$(CC) $(GUI_OBJS) -o ardour7 $(COMMON_LIBS)
 
 ardev.a: $(GUI_OBJS)
 	@echo "Creating $@"
