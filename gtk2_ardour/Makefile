@@ -38,24 +38,24 @@ CPP_FILES += automation_streamview.cc
 CPP_FILES += automation_time_axis.cc
 CPP_FILES += axis_view.cc
 CPP_FILES += bbt_marker_dialog.cc
-CPP_FILES += beatbox_gui.cc
+#CPP_FILES += beatbox_gui.cc # _ It tries to find canvas/constrained_item.h which doesn't exist
 CPP_FILES += big_clock_window.cc
 CPP_FILES += big_transport_window.cc
-CPP_FILES += bundle_env_cocoa.cc
+#CPP_FILES += bundle_env_cocoa.cc # Needs asl.h - doesn't exist anywhere
 CPP_FILES += bundle_env_linux.cc
-CPP_FILES += bundle_env_mingw.cc
-CPP_FILES += bundle_env_msvc.cc
+#CPP_FILES += bundle_env_mingw.cc # Windows
+#CPP_FILES += bundle_env_msvc.cc # windows
 CPP_FILES += bundle_manager.cc
-CPP_FILES += canvas_test.cc
+#CPP_FILES += canvas_test.cc
 CPP_FILES += clock_group.cc
 CPP_FILES += color_theme_manager.cc
 CPP_FILES += configinfo.cc
 CPP_FILES += control_point.cc
 CPP_FILES += control_point_dialog.cc
 CPP_FILES += control_slave_ui.cc
-CPP_FILES += cuebox_ui.cc
+#CPP_FILES += cuebox_ui.cc # - Usage of name not declared in scope, ArdourCanvas has no member name
 CPP_FILES += cursor_context.cc
-CPP_FILES += curvetest.cc
+#CPP_FILES += curvetest.cc
 CPP_FILES += debug.cc
 CPP_FILES += dsp_stats_ui.cc
 CPP_FILES += dsp_stats_window.cc
@@ -93,7 +93,7 @@ CPP_FILES += editor_timefx.cc
 CPP_FILES += editor_videotimeline.cc
 CPP_FILES += engine_dialog.cc
 CPP_FILES += enums.cc
-CPP_FILES += evtest.cc
+#CPP_FILES += evtest.cc
 CPP_FILES += export_analysis_graphs.cc
 CPP_FILES += export_channel_selector.cc
 CPP_FILES += export_dialog.cc
@@ -142,8 +142,8 @@ CPP_FILES += luadialog.cc
 CPP_FILES += luadoc.cc
 CPP_FILES += luainstance.cc
 CPP_FILES += luawindow.cc
-CPP_FILES += lv2_plugin_ui.cc
-CPP_FILES += lxvst_plugin_ui.cc
+#CPP_FILES += lv2_plugin_ui.cc  # Only if HAVE_SUIL (which we don't)
+#CPP_FILES += lxvst_plugin_ui.cc # LXVSTPlugin does not hame a type
 CPP_FILES += main.cc
 CPP_FILES += main_clock.cc
 CPP_FILES += marker.cc
@@ -238,7 +238,7 @@ CPP_FILES += region_gain_line.cc
 CPP_FILES += region_layering_order_editor.cc
 CPP_FILES += region_list_base.cc
 CPP_FILES += region_peak_cursor.cc
-CPP_FILES += region_properties_box.cc
+#CPP_FILES += region_properties_box.cc # - does not name a type
 CPP_FILES += region_selection.cc
 CPP_FILES += region_view.cc
 CPP_FILES += return_ui.cc
@@ -296,7 +296,7 @@ CPP_FILES += time_fx_dialog.cc
 CPP_FILES += time_info_box.cc
 CPP_FILES += time_selection.cc
 CPP_FILES += timers.cc
-CPP_FILES += toolbar_test.cc
+#CPP_FILES += toolbar_test.cc
 CPP_FILES += track_record_axis.cc
 CPP_FILES += track_selection.cc
 CPP_FILES += track_view_list.cc
@@ -331,15 +331,17 @@ CPP_FILES += video_server_dialog.cc
 CPP_FILES += video_timeline.cc
 CPP_FILES += virtual_keyboard_window.cc
 CPP_FILES += visibility_group.cc
-CPP_FILES += vst3_hwnd_plugin_ui.cc
-CPP_FILES += vst3_plugin_ui.cc
-CPP_FILES += vst3_x11_plugin_ui.cc
 CPP_FILES += vst_plugin_ui.cc
 CPP_FILES += window_manager.cc
 CPP_FILES += windows_vst_plugin_ui.cc
 
+# VST3 Support
+#CPP_FILES += vst3_hwnd_plugin_ui.cc (darwin)
+#CPP_FILES += vst3_plugin_ui.cc (windows)
+CPP_FILES += vst3_x11_plugin_ui.cc
+
 # If you can't find it: use pkg-config --list-all | grep
-COMMON_FLAGS += $(shell pkg-config --cflags glibmm-2.4 gtkmm-2.4 libxml-2.0)
+COMMON_FLAGS += $(shell pkg-config --cflags glibmm-2.4 gtkmm-2.4 libxml-2.0 lilv-0)
 
 BUILD_C_FLAGS += $(COMMON_FLAGS)
 
@@ -348,7 +350,7 @@ BUILD_C_FLAGS += -I../libs/pbd
 BUILD_C_FLAGS += -I../libs/ardour
 BUILD_C_FLAGS += -I../libs/gtkmm2ext
 BUILD_C_FLAGS += -I../libs/temporal
-BUILD_C_FLAGS += -I../libs/widgets
+BUILD_C_FLAGS += -I../libs/widgets -I../libs/widgets/widgets
 BUILD_C_FLAGS += -I../libs/canvas
 BUILD_C_FLAGS += -I../libs/evoral
 BUILD_C_FLAGS += -I../libs/lua
@@ -358,11 +360,13 @@ BUILD_C_FLAGS += -I../libs/waveview
 BUILD_C_FLAGS += -I../libs/zita-resampler
 BUILD_C_FLAGS += -I../libs/ctrl-interface/control_protocol
 BUILD_C_FLAGS += -I../libs/ptformat
+BUILD_C_FLAGS += -I../libs/audiographer
 
 # FLAGS (Mostly defined in /wscript)
 BUILD_C_FLAGS += -DVERSIONSTRING=\"7.5\"
 BUILD_C_FLAGS += -DPROGRAM_VERSION=\"7.5\"
 BUILD_C_FLAGS += -DPROGRAM_NAME=\"Ardour\"
+BUILD_C_FLAGS += -DLOCALEDIR=\"\"
 
 # BUG: Need this otherwise boost complains about declaring bind placeholders
 BUILD_C_FLAGS += -DBOOST_BIND_GLOBAL_PLACEHOLDERS
@@ -370,16 +374,22 @@ BUILD_C_FLAGS += -DBOOST_BIND_GLOBAL_PLACEHOLDERS
 # In gtk2_ardour wscript PACKAGE is defined to I18N_PACKAGE
 BUILD_C_FLAGS += -DPACKAGE=\"gtk2_ardour7\"
 
+# Need to specify that we are using rubberband, otherwise we run into code issues
+# Specifically in editor_drag.cc
+BUILD_C_FLAGS += -DUSE_RUBBERBAND
+
 # Flags for CC building
 WARN_FLAGS += -Wno-deprecated-declarations
 
 # WASM (if wasm, then include wasmutils.cpp)
 
 
+# Interesting - ardev which is the main binary is just a shell command that calls into
+# ardev_common_waf.sh
 
 
 
-CC=g++ $(WARN_FLAGS) -Werror
+CC=g++ $(WARN_FLAGS)
 BUILD_DIR = ../build_test
 GUI_OBJS = $(CPP_FILES:%=$(BUILD_DIR)/%.o)
 
@@ -389,7 +399,7 @@ all: $(TARGETS)
 
 $(BUILD_DIR)/%.cc.o: %.cc
 	-@mkdir -p "$(shell dirname $(BUILD_DIR)/$<)"
-	@echo "Compiling $<"
+	@echo "\nCompiling $<"
 	$(CC) $< $(BUILD_C_FLAGS) -c -o $@
 
 ardev.a: $(GUI_OBJS)
