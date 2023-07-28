@@ -22,7 +22,7 @@ CPP_FILES += ardour_ui_session.cc
 CPP_FILES += ardour_ui_startup.cc
 CPP_FILES += ardour_ui_video.cc
 CPP_FILES += ardour_window.cc
-CPP_FILES += audio_clip_editor.cc
+#CPP_FILES += audio_clip_editor.cc # Uses ->name which does not exist (need to investiage)
 CPP_FILES += audio_clock.cc
 CPP_FILES += audio_region_editor.cc
 CPP_FILES += audio_region_operations_box.cc
@@ -338,7 +338,8 @@ CPP_FILES += vst_plugin_ui.cc
 CPP_FILES += window_manager.cc
 CPP_FILES += windows_vst_plugin_ui.cc
 
-COMMON_FLAGS += $(shell pkg-config --cflags glibmm-2.4 gtkmm-2.4)
+# If you can't find it: use pkg-config --list-all | grep
+COMMON_FLAGS += $(shell pkg-config --cflags glibmm-2.4 gtkmm-2.4 libxml-2.0)
 
 BUILD_C_FLAGS += $(COMMON_FLAGS)
 
@@ -347,10 +348,24 @@ BUILD_C_FLAGS += -I../libs/pbd
 BUILD_C_FLAGS += -I../libs/ardour
 BUILD_C_FLAGS += -I../libs/gtkmm2ext
 BUILD_C_FLAGS += -I../libs/temporal
+BUILD_C_FLAGS += -I../libs/widgets
+BUILD_C_FLAGS += -I../libs/canvas
+BUILD_C_FLAGS += -I../libs/evoral
+BUILD_C_FLAGS += -I../libs/lua
+BUILD_C_FLAGS += -I../libs/midi++2
+BUILD_C_FLAGS += -I../libs/libltc/ltc
+BUILD_C_FLAGS += -I../libs/waveview
+BUILD_C_FLAGS += -I../libs/zita-resampler
+BUILD_C_FLAGS += -I../libs/ctrl-interface/control_protocol
+BUILD_C_FLAGS += -I../libs/ptformat
 
 # FLAGS (Mostly defined in /wscript)
-BUILD_C_FLAGS += -DVERSIONSTRING=7.5
+BUILD_C_FLAGS += -DVERSIONSTRING=\"7.5\"
+BUILD_C_FLAGS += -DPROGRAM_VERSION=\"7.5\"
 BUILD_C_FLAGS += -DPROGRAM_NAME=\"Ardour\"
+
+# BUG: Need this otherwise boost complains about declaring bind placeholders
+BUILD_C_FLAGS += -DBOOST_BIND_GLOBAL_PLACEHOLDERS
 
 # In gtk2_ardour wscript PACKAGE is defined to I18N_PACKAGE
 BUILD_C_FLAGS += -DPACKAGE=\"gtk2_ardour7\"
