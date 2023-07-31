@@ -11,7 +11,7 @@ nodarn@nodar-home:~/projects/github/ardour [wasm] $ ldd build/gtk2_ardour/ardour
 		libwaveview.so.0 => not found
 		libardour.so.3 => not found
 		libmidipp.so.4 => not found
-		libevoral.so.0 => not found
+[DONE]	libevoral.so.0 => not found
 [DONE]	libtemporal.so.0 => not found 
     	libaudiographer.so.0 => not found
     	libptformat.so.0 => not found

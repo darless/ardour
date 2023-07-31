@@ -3,6 +3,8 @@ ifeq ($(ROOT),)
 $(error ROOT must be set)
 endif
 
+BASE_BUILD = $(ROOT)/build_test
+
 WARN_FLAGS += -Wno-deprecated-declarations
 
 # EM++ warning about -shared library
