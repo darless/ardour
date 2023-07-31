@@ -43,6 +43,7 @@ tags
 .waf3-*
 .lock-waf*
 /build/
+/build_test/
 /doc/html/
 /doc/latex/
 /doc/ardourapi.json.gz

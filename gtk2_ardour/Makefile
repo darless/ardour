@@ -1,3 +1,7 @@
+ROOT = ../
+include $(ROOT)/Makefile.base.mk
+
+
 CPP_FILES += about.cc
 CPP_FILES += actions.cc
 CPP_FILES += add_route_dialog.cc
@@ -347,45 +351,7 @@ COMMON_LIBS += -lpthread
 COMMON_FLAGS += $(shell pkg-config --cflags glibmm-2.4 gtkmm-2.4 libxml-2.0 lilv-0 x11)
 COMMON_LIBS += $(shell pkg-config --libs glibmm-2.4 gtkmm-2.4 libxml-2.0 lilv-0 x11)
 
-BUILD_C_FLAGS += $(COMMON_FLAGS)
-
-# WTF: signals.py has a lot of RAW stuff in there to generate a header file, why not just have a header file??
-BUILD_C_FLAGS += -I../libs
-BUILD_C_FLAGS += -I../libs/pbd
-BUILD_C_FLAGS += -I../libs/ardour
-BUILD_C_FLAGS += -I../libs/gtkmm2ext
-BUILD_C_FLAGS += -I../libs/temporal
-BUILD_C_FLAGS += -I../libs/widgets -I../libs/widgets/widgets
-BUILD_C_FLAGS += -I../libs/canvas
-BUILD_C_FLAGS += -I../libs/evoral
-BUILD_C_FLAGS += -I../libs/lua
-BUILD_C_FLAGS += -I../libs/midi++2
-BUILD_C_FLAGS += -I../libs/libltc/ltc
-BUILD_C_FLAGS += -I../libs/waveview
-BUILD_C_FLAGS += -I../libs/zita-resampler
-BUILD_C_FLAGS += -I../libs/ctrl-interface/control_protocol
-BUILD_C_FLAGS += -I../libs/ptformat
-BUILD_C_FLAGS += -I../libs/audiographer
-BUILD_C_FLAGS += -I../libs/vst3
-
-# FLAGS (Mostly defined in /wscript)
-BUILD_C_FLAGS += -DVERSIONSTRING=\"7.5\"
-BUILD_C_FLAGS += -DPROGRAM_VERSION=\"7.5\"
-BUILD_C_FLAGS += -DPROGRAM_NAME=\"Ardour\"
-BUILD_C_FLAGS += -DLOCALEDIR=\"\"
-
-# BUG: Need this otherwise boost complains about declaring bind placeholders
-BUILD_C_FLAGS += -DBOOST_BIND_GLOBAL_PLACEHOLDERS
-
-# In gtk2_ardour wscript PACKAGE is defined to I18N_PACKAGE
-BUILD_C_FLAGS += -DPACKAGE=\"gtk2_ardour7\"
-
-# Need to specify that we are using rubberband, otherwise we run into code issues
-# Specifically in editor_drag.cc
-BUILD_C_FLAGS += -DUSE_RUBBERBAND
-
-# Flags for CC building
-WARN_FLAGS += -Wno-deprecated-declarations
+BUILD_C_FLAGS += $(COMMON_FLAGS) $(BASE_PKG_FLAGS) $(BASE_LIB_INC)
 
 # WASM (if wasm, then include wasmutils.cpp)
 
@@ -393,12 +359,8 @@ WARN_FLAGS += -Wno-deprecated-declarations
 # Interesting - ardev which is the main binary is just a shell command that calls into
 # ardev_common_waf.sh
 
-
-
-CC=g++ $(WARN_FLAGS)
-BUILD_DIR = ../build_test
+BUILD_DIR = ../build_test/gtk2_ardour
 GUI_OBJS = $(CPP_FILES:%=$(BUILD_DIR)/%.o)
-
 TARGETS = ardour7
 
 all: $(TARGETS)
@@ -410,10 +372,7 @@ $(BUILD_DIR)/%.cc.o: %.cc
 
 ardour7: $(GUI_OBJS)
 	@echo "Creating $@"
-	$(CC) $(GUI_OBJS) -o ardour7 $(COMMON_LIBS)
-
-ardev.a: $(GUI_OBJS)
-	@echo "Creating $@"
+	$(CC) $(GUI_OBJS) -o ardour7 $(COMMON_LIBS) $(ARDOUR_LIBS)
 
 
 
